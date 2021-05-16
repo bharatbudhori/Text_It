@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "843997113307",
+    "project_id": "chatify-5d7b0",
+    "storage_bucket": "chatify-5d7b0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843997113307:android:3eeb21168ab73faa3315fe",
+        "android_client_info": {
+          "package_name": "com.bharat.chati_fy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843997113307-2rd69df6mmsup0desnf1lg8agqm2as05.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0tugvo95edP868teAKmi3hXiPrKgu774"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843997113307-2rd69df6mmsup0desnf1lg8agqm2as05.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
