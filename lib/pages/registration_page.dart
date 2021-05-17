@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:chati_fy/services/navigation_service.dart';
 import 'package:flutter/material.dart';
+
+import '../services/media_service.dart';
 
 class RegistrationPage extends StatefulWidget {
   @override
@@ -7,6 +12,12 @@ class RegistrationPage extends StatefulWidget {
 
 class _RegistrationPageState extends State<RegistrationPage> {
   GlobalKey<FormState> _formKey;
+  File _image;
+  String _name;
+  String _email;
+  String _password;
+
+  BuildContext parentContext;
 
   double _deviceHeight;
   double _deviceWidth;
@@ -17,6 +28,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   @override
   Widget build(BuildContext context) {
+    parentContext = context;
     _deviceHeight = MediaQuery.of(context).size.height;
     _deviceWidth = MediaQuery.of(context).size.height;
 
@@ -24,24 +36,28 @@ class _RegistrationPageState extends State<RegistrationPage> {
       backgroundColor: Theme.of(context).backgroundColor,
       body: Container(
         alignment: Alignment.center,
-        child: signUpPageUI(),
+        child: regestrationPageUI(),
       ),
     );
   }
 
-  Widget signUpPageUI() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: _deviceWidth * 0.08),
-      //color: Colors.red,
-      height: _deviceHeight * 0.75,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _headingWidget(),
-          _inputForm(),
-        ],
+  Widget regestrationPageUI() {
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25),
+        //color: Colors.red,
+        height: _deviceHeight * 0.80,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _headingWidget(),
+            _inputForm(),
+            _registerButton(),
+            _backToLoginPageButton(),
+          ],
+        ),
       ),
     );
   }
@@ -88,6 +104,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _imageSelectorWidget(),
+            _nameTextField(),
+            _emailTextField(),
+            _passwordTextField(),
           ],
         ),
       ),
@@ -95,15 +114,194 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   Widget _imageSelectorWidget() {
-    return Container(
-      alignment: Alignment.center,
-      child: CircleAvatar(
-        radius: _deviceHeight * 0.06,
-        backgroundColor: Colors.amber,
-        backgroundImage: NetworkImage(
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNOhpV67XSI4Vz5Z_L7XoWiH7UzZQDBTzS3g&usqp=CAU',
+    return GestureDetector(
+      onTap: () {
+        return showDialog(
+            context: parentContext,
+            builder: (context) {
+              return SimpleDialog(
+                title: Text(
+                  'Select image',
+                  style: TextStyle(fontSize: 25),
+                ),
+                children: [
+                  SimpleDialogOption(
+                    padding: EdgeInsets.all(8),
+                    child: Text(
+                      'Photo with Camera',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    onPressed: handleTakePhoto,
+                  ),
+                  SimpleDialogOption(
+                    padding: EdgeInsets.all(8),
+                    child: Text(
+                      'Image from Gallery',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    onPressed: handleChooseFromGallery,
+                  ),
+                  SimpleDialogOption(
+                    padding: EdgeInsets.all(8),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              );
+            });
+      },
+      child: Container(
+        alignment: Alignment.center,
+        child: CircleAvatar(
+          radius: _deviceHeight * 0.06,
+          backgroundColor: Colors.amber,
+          backgroundImage: _image == null
+              ? NetworkImage(
+                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNOhpV67XSI4Vz5Z_L7XoWiH7UzZQDBTzS3g&usqp=CAU',
+                )
+              : FileImage(_image),
         ),
       ),
     );
+  }
+
+  Widget _nameTextField() {
+    return TextFormField(
+      autocorrect: false,
+      style: TextStyle(
+        color: Colors.white,
+      ),
+      validator: (_input) {
+        return (_input.length != 0) ? null : 'Please enter a name';
+      },
+      onSaved: (_input) {
+        setState(() {
+          _name = _input;
+        });
+      },
+      cursorColor: Colors.white,
+      decoration: InputDecoration(
+        hintText: 'Name',
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _emailTextField() {
+    return TextFormField(
+      autocorrect: false,
+      style: TextStyle(
+        color: Colors.white,
+      ),
+      validator: (_input) {
+        return (_input.length != 0 && _input.contains('@'))
+            ? null
+            : 'Please enter a valid email';
+      },
+      onSaved: (_input) {
+        setState(() {
+          _email = _input;
+        });
+      },
+      cursorColor: Colors.white,
+      decoration: InputDecoration(
+        hintText: 'Email address',
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _passwordTextField() {
+    return TextFormField(
+      autocorrect: false,
+      obscureText: true,
+      style: TextStyle(
+        color: Colors.white,
+      ),
+      validator: (_input) {
+        return _input.trim().length > 4 ? null : 'Password too short';
+      },
+      onSaved: (_input) {
+        setState(() {
+          _password = _input;
+        });
+      },
+      cursorColor: Colors.white,
+      decoration: InputDecoration(
+        hintText: 'Password',
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _registerButton() {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      height: _deviceHeight * 0.06,
+      width: _deviceWidth,
+      child: MaterialButton(
+        onPressed: () {},
+        color: Colors.blue,
+        child: Text(
+          'REGISTER',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _backToLoginPageButton() {
+    return Container(
+      height: _deviceHeight * 0.06,
+      width: _deviceWidth,
+      alignment: Alignment.center,
+      child: IconButton(
+        icon: Icon(
+          Icons.arrow_back,
+          size: 35,
+        ),
+        color: Colors.white,
+        onPressed: () {
+          NavigationServices.instance.goBack();
+        },
+      ),
+    );
+  }
+
+  handleTakePhoto() async {
+    Navigator.of(parentContext).pop();
+    File _imageFile = await MediaService.instance.getIamgeFromLibrary('camera');
+    setState(() {
+      _image = _imageFile;
+    });
+  }
+
+  handleChooseFromGallery() async {
+    Navigator.of(parentContext).pop();
+    File _imageFile =
+        await MediaService.instance.getIamgeFromLibrary('gallery');
+    setState(() {
+      _image = _imageFile;
+    });
   }
 }

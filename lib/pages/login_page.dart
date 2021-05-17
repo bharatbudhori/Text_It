@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../services/snackbar_services.dart';
+import '../services/navigation_service.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -50,30 +51,33 @@ class _LoginPageState extends State<LoginPage> {
         SnackBarServices.instace.buildContext = context;
         _auth = Provider.of<AuthProvider>(context);
         //print(_auth.user);
-        return ListView(
-          children: [
-            Container(
-              padding: EdgeInsets.all(25),
-              height: _deviceHeight * 0.6,
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _headingWidget(),
-                  _inputForm(),
-                ],
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(25),
+                height: _deviceHeight * 0.6,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _headingWidget(),
+                    _inputForm(),
+                  ],
+                ),
               ),
-            ),
-            Container(
-              height: _deviceHeight * 0.3,
-              child: Image.network(
-                'https://images.unsplash.com/photo-1473081556163-2a17de81fc97?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ],
+              // Container(
+              //   height: _deviceHeight * 0.3,
+              //   width: double.infinity,
+              //   child: Image.network(
+              //     'https://images.unsplash.com/photo-1473081556163-2a17de81fc97?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80',
+              //     fit: BoxFit.cover,
+              //   ),
+              // ),
+            ],
+          ),
         );
       },
     );
@@ -219,7 +223,9 @@ class _LoginPageState extends State<LoginPage> {
     return Container(
       width: double.infinity,
       child: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          NavigationServices.instance.navigateTo('register');
+        },
         child: Text(
           'REGISTER',
           textAlign: TextAlign.center,
