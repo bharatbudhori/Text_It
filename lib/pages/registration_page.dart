@@ -1,7 +1,11 @@
 import 'dart:io';
 
+import 'package:chati_fy/services/cloud_storage_service.dart';
+import 'package:chati_fy/services/db_service.dart';
 import 'package:chati_fy/services/navigation_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 import '../services/media_service.dart';
 
@@ -16,6 +20,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String _name;
   String _email;
   String _password;
+  AuthProvider _auth;
 
   BuildContext parentContext;
 
@@ -36,29 +41,37 @@ class _RegistrationPageState extends State<RegistrationPage> {
       backgroundColor: Theme.of(context).backgroundColor,
       body: Container(
         alignment: Alignment.center,
-        child: regestrationPageUI(),
+        child: ChangeNotifierProvider<AuthProvider>.value(
+          value: AuthProvider.instance,
+          child: regestrationPageUI(),
+        ),
       ),
     );
   }
 
   Widget regestrationPageUI() {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.all(25),
-        //color: Colors.red,
-        height: _deviceHeight * 0.80,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _headingWidget(),
-            _inputForm(),
-            _registerButton(),
-            _backToLoginPageButton(),
-          ],
-        ),
-      ),
+    return Builder(
+      builder: (BuildContext _context) {
+        _auth = Provider.of<AuthProvider>(_context);
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(25),
+            //color: Colors.red,
+            height: _deviceHeight * 0.80,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _headingWidget(),
+                _inputForm(),
+                _registerButton(),
+                _backToLoginPageButton(),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -92,7 +105,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   Widget _inputForm() {
     return Container(
-      height: _deviceHeight * 0.35,
+      height: _deviceHeight * 0.40,
       child: Form(
         key: _formKey,
         onChanged: () {
@@ -159,7 +172,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         alignment: Alignment.center,
         child: CircleAvatar(
           radius: _deviceHeight * 0.06,
-          backgroundColor: Colors.amber,
+          backgroundColor: Colors.grey,
           backgroundImage: _image == null
               ? NetworkImage(
                   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNOhpV67XSI4Vz5Z_L7XoWiH7UzZQDBTzS3g&usqp=CAU',
@@ -256,17 +269,30 @@ class _RegistrationPageState extends State<RegistrationPage> {
       margin: EdgeInsets.symmetric(vertical: 10),
       height: _deviceHeight * 0.06,
       width: _deviceWidth,
-      child: MaterialButton(
-        onPressed: () {},
-        color: Colors.blue,
-        child: Text(
-          'REGISTER',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
+      child: _auth.status == AuthStatus.Authenticating
+          ? Center(child: CircularProgressIndicator())
+          : MaterialButton(
+              onPressed: () {
+                if (_formKey.currentState.validate() && _image != null) {
+                  _auth.registerUserWithEmailAndPassword(_email, _password,
+                      (String _uid) async {
+                    var _result = await CloudStorageService.instance
+                        .uploadUserImage(_uid, _image);
+                    var _imageURL = await _result.ref.getDownloadURL();
+                    await DBService.instance
+                        .createUserInDB(_uid, _name, _email, _imageURL);
+                  });
+                }
+              },
+              color: Colors.blue,
+              child: Text(
+                'REGISTER',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
     );
   }
 
