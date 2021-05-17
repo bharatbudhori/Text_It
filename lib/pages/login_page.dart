@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../services/snackbar_services.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -29,6 +30,8 @@ class _LoginPageState extends State<LoginPage> {
     _deviceHeight = MediaQuery.of(context).size.height;
     _deviceWidth = MediaQuery.of(context).size.height;
 
+    SnackBarServices.instace.buildContext = context;
+
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       body: Center(
@@ -44,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
     // print(_password);
     return Builder(
       builder: (context) {
+        SnackBarServices.instace.buildContext = context;
         _auth = Provider.of<AuthProvider>(context);
         //print(_auth.user);
         return ListView(
