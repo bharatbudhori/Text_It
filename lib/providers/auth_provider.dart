@@ -17,7 +17,7 @@ class AuthProvider with ChangeNotifier {
   AuthStatus status;
   User user;
 
-  FirebaseAuth _auth;
+  dynamic _auth;
 
   static AuthProvider instance = AuthProvider();
   AuthProvider() {
