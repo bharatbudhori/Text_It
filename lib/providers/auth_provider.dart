@@ -17,11 +17,25 @@ class AuthProvider with ChangeNotifier {
   AuthStatus status;
   User user;
 
-  dynamic _auth;
+  FirebaseAuth _auth;
 
   static AuthProvider instance = AuthProvider();
   AuthProvider() {
     _auth = FirebaseAuth.instance;
+    chechCurrentUserIsAuthenticated();
+  }
+
+  void autoLogin() {
+    if (user != null) {
+      NavigationServices.instance.navigateToReplacement('home');
+    }
+  }
+
+  void chechCurrentUserIsAuthenticated() async {
+    user = await _auth.currentUser;
+    if (user != null) {
+      NavigationServices.instance.navigateToReplacement('home');
+    }
   }
 
   void loginUserWithEmailAndPassword(String _email, String _password) async {
