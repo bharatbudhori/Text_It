@@ -1,7 +1,7 @@
 import 'package:chati_fy/models/contact.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-//import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../providers/auth_provider.dart';
 import '../services/db_service.dart';
@@ -35,14 +35,14 @@ class ProfilePage extends StatelessWidget {
         return StreamBuilder<Contact>(
           stream: DBService.instance.getUserData(_auth.user.uid),
           builder: (_context, _snapshot) {
-            //var _userData = _snapshot.data;
-            //return !_snapshot.hasData
-            // ? Center(
-            //     child: SpinKitPouringHourglass(
-            //       color: Colors.blue,
-            //     ),
-            //   )
-            // :
+            var _userData = _snapshot.data;
+            // return _snapshot.connectionState == ConnectionState.waiting
+            //     ? Center(
+            //         child: SpinKitPouringHourglass(
+            //           color: Colors.blue,
+            //         ),
+            //       )
+            //:
             return Align(
               alignment: Alignment.center,
               child: SizedBox(
@@ -52,11 +52,9 @@ class ProfilePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    _userImageWidget(
-                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsLWfhRGKi5rXDo26WACBsX_aVbDYdAakP4w&usqp=CAU',
-                    ),
-                    _userNameWidget('Tom Cruise'),
-                    _userEmailWidget('tomcruice17@gmail.com'),
+                    _userImageWidget('_userData.image'),
+                    _userNameWidget('_userData.name'),
+                    _userEmailWidget('_userData.email'),
                     _logoutButton(),
                   ],
                 ),

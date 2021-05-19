@@ -1,4 +1,12 @@
+import 'package:chati_fy/models/conversation.dart';
+import 'package:chati_fy/services/db_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart' as timeago;
+
+import '../providers/auth_provider.dart';
 
 class RecentConversations extends StatelessWidget {
   final double _height;
@@ -14,48 +22,72 @@ class RecentConversations extends StatelessWidget {
     return Container(
       height: _height,
       width: _width,
-      child: _conversationsListViewWidget(),
-    );
-  }
-
-  Widget _conversationsListViewWidget() {
-    return Container(
-      height: _height,
-      width: _width,
-      child: ListView.builder(
-        itemCount: 2,
-        itemBuilder: (_context, _index) {
-          return ListTile(
-            onTap: () {},
-            title: Text('Will Smith'),
-            subtitle: Text('Sorry, for late response buddy!!'),
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(
-                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3Ktc8CXLt7lJ9mezatk_JhV3nvuxcSCCrAg&usqp=CAU',
-              ),
-            ),
-            trailing: _listTileTrailingWidget(),
-          );
-        },
+      child: ChangeNotifierProvider<AuthProvider>.value(
+        value: AuthProvider.instance,
+        child: _conversationsListViewWidget(),
       ),
     );
   }
 
-  Widget _listTileTrailingWidget() {
+  Widget _conversationsListViewWidget() {
+    return Builder(
+      builder: (BuildContext _context) {
+        var _auth = Provider.of<AuthProvider>(_context);
+        return Container(
+          height: _height,
+          width: _width,
+          child: StreamBuilder<List<ConversationSnippet>>(
+            stream: DBService.instance.getUSerConversations(_auth.user.uid),
+            builder: (_context, _snapshot) {
+              var _data = _snapshot.data;
+              return !_snapshot.hasData
+                  ? Center(
+                      child: SpinKitPouringHourglass(
+                        color: Colors.blue,
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _data.length,
+                      itemBuilder: (_context, _index) {
+                        return ListTile(
+                          onTap: () {},
+                          title: Text(_data[_index].name),
+                          subtitle: Text(_data[_index].lastMessage),
+                          leading: CircleAvatar(
+                            radius: 25,
+                            backgroundImage: NetworkImage(
+                              _data[_index].image,
+                            ),
+                          ),
+                          trailing:
+                              _listTileTrailingWidget(_data[_index].timestamp),
+                        );
+                      },
+                    );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _listTileTrailingWidget(Timestamp _lastMessageTimestamp) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
-          'Last seen',
+          _lastMessageTimestamp == null
+              ? ''
+              : timeago.format(_lastMessageTimestamp.toDate()),
           style: TextStyle(
             fontSize: 15,
           ),
         ),
         CircleAvatar(
           radius: 6,
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.green,
         ),
       ],
     );

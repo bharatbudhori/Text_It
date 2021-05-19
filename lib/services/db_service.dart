@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:chati_fy/models/contact.dart';
+import 'package:chati_fy/models/conversation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DBService {
@@ -31,8 +34,22 @@ class DBService {
 
   Stream<Contact> getUserData(String _userID) {
     var _ref = _db.collection(_userCollection).doc(_userID);
-    return _ref.get().asStream().map((_snapshot) {
+    return _ref.snapshots().map((_snapshot) {
       return Contact.fromFirestore(_snapshot);
     });
+  }
+
+  Stream<List<ConversationSnippet>> getUSerConversations(String _userID) {
+    var ref = _db
+        .collection(_userCollection)
+        .doc(_userID)
+        .collection('Conversations');
+    return ref.snapshots().map(
+      (_snapshot) {
+        return _snapshot.docs.map((_doc) {
+          return ConversationSnippet.fromFirestore(_doc);
+        }).toList();
+      },
+    );
   }
 }
