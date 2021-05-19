@@ -101,9 +101,9 @@ class AuthProvider with ChangeNotifier {
       user = null;
       status = AuthStatus.NotAuthenticated;
       await onSuccess();
-      await NavigationServices.instance.navigateToReplacement('login');
-      SnackBarServices.instace
-          .showSnackbarSuccess('User logged out successfully');
+      NavigationServices.instance.navigateToReplacement('login');
+      // SnackBarServices.instace
+      //     .showSnackbarSuccess('User logged out successfully');
     } catch (error) {
       SnackBarServices.instace.showSnackbarError('Error logging out');
     }

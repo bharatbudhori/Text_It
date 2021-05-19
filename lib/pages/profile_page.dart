@@ -36,30 +36,29 @@ class ProfilePage extends StatelessWidget {
           stream: DBService.instance.getUserData(_auth.user.uid),
           builder: (_context, _snapshot) {
             var _userData = _snapshot.data;
-            // return _snapshot.connectionState == ConnectionState.waiting
-            //     ? Center(
-            //         child: SpinKitPouringHourglass(
-            //           color: Colors.blue,
-            //         ),
-            //       )
-            //:
-            return Align(
-              alignment: Alignment.center,
-              child: SizedBox(
-                height: _height * 0.50,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    _userImageWidget('_userData.image'),
-                    _userNameWidget('_userData.name'),
-                    _userEmailWidget('_userData.email'),
-                    _logoutButton(),
-                  ],
-                ),
-              ),
-            );
+            return _snapshot.connectionState == ConnectionState.waiting
+                ? Center(
+                    child: SpinKitPouringHourglass(
+                      color: Colors.blue,
+                    ),
+                  )
+                : Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      height: _height * 0.50,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          _userImageWidget(_userData.image),
+                          _userNameWidget(_userData.name),
+                          _userEmailWidget(_userData.email),
+                          _logoutButton(),
+                        ],
+                      ),
+                    ),
+                  );
           },
         );
       },
