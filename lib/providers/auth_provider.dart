@@ -22,6 +22,8 @@ class AuthProvider with ChangeNotifier {
   static AuthProvider instance = AuthProvider();
   AuthProvider() {
     _auth = FirebaseAuth.instance;
+
+    //print(_auth.currentUser);
     chechCurrentUserIsAuthenticated();
   }
 
@@ -34,6 +36,8 @@ class AuthProvider with ChangeNotifier {
   void chechCurrentUserIsAuthenticated() async {
     user = await _auth.currentUser;
     if (user != null) {
+      print(user.email);
+      // print(user.photoURL);
       NavigationServices.instance.navigateToReplacement('home');
     }
   }
@@ -86,6 +90,22 @@ class AuthProvider with ChangeNotifier {
       print('login error ');
       //Display an error
 
+    }
+    notifyListeners();
+  }
+
+  void logoutUser(Future<void> onSuccess()) async {
+    try {
+      print('logging out');
+      await _auth.signOut();
+      user = null;
+      status = AuthStatus.NotAuthenticated;
+      await onSuccess();
+      await NavigationServices.instance.navigateToReplacement('login');
+      SnackBarServices.instace
+          .showSnackbarSuccess('User logged out successfully');
+    } catch (error) {
+      SnackBarServices.instace.showSnackbarError('Error logging out');
     }
     notifyListeners();
   }

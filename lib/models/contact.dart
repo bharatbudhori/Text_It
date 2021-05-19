@@ -7,10 +7,18 @@ class Contact {
   final Timestamp lastSeen;
   final String name;
 
-  Contact({this.email, this.id, this.image, this.lastSeen, this.name});
+  Contact({
+    this.email,
+    this.id,
+    this.image,
+    this.lastSeen,
+    this.name,
+  });
 
   factory Contact.fromFirestore(dynamic _snapshot) {
-    var _data = _snapshot.data;
+    var _data = _snapshot;
+    print(_data);
+    print('error!!!!!!!!');
     return Contact(
       id: _snapshot.id,
       lastSeen: _data['lastSeen'],

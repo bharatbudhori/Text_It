@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 //import 'package:chati_fy/pages/login_page.dart';
 import './pages/registration_page.dart';
 import './services/navigation_service.dart';
-import './services/db_service.dart';
+
 import './pages/home_page.dart';
 
 void main() async {
@@ -17,8 +17,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    DBService.instance
-        .createUserInDB('0213', 'james', 'James@gmail.com', 'Imageurl..///');
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ChatiFy',

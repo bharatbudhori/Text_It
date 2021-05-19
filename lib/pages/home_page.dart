@@ -1,3 +1,4 @@
+import 'package:chati_fy/pages/recent_conversations_pages.dart';
 import 'package:flutter/material.dart';
 
 import './profile_page.dart';
@@ -67,7 +68,7 @@ class _HomePageState extends State<HomePage>
       controller: _tabController,
       children: [
         ProfilePage(_height, _width),
-        ProfilePage(_height, _width),
+        RecentConversations(_height, _width),
         ProfilePage(_height, _width),
       ],
     );

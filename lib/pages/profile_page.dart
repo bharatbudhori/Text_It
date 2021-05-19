@@ -1,6 +1,7 @@
 import 'package:chati_fy/models/contact.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+//import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../providers/auth_provider.dart';
 import '../services/db_service.dart';
@@ -8,6 +9,7 @@ import '../services/db_service.dart';
 class ProfilePage extends StatelessWidget {
   final double _height;
   final double _width;
+  AuthProvider _auth;
 
   ProfilePage(
     this._height,
@@ -20,8 +22,8 @@ class ProfilePage extends StatelessWidget {
       height: _height,
       width: _width,
       child: ChangeNotifierProvider<AuthProvider>.value(
-        child: _profilePageUI(),
         value: AuthProvider.instance,
+        child: _profilePageUI(),
       ),
     );
   }
@@ -29,32 +31,37 @@ class ProfilePage extends StatelessWidget {
   Widget _profilePageUI() {
     return Builder(
       builder: (BuildContext _context) {
-        var _auth = Provider.of<AuthProvider>(_context);
+        _auth = Provider.of<AuthProvider>(_context);
         return StreamBuilder<Contact>(
           stream: DBService.instance.getUserData(_auth.user.uid),
           builder: (_context, _snapshot) {
-            var _userData = _snapshot.data;
-            return !_snapshot.hasData
-                ? Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : Align(
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      height: _height * 0.50,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          _userImageWidget(_userData.image),
-                          _userNameWidget(_userData.name),
-                          _userEmailWidget(_userData.email),
-                          _logoutButton(),
-                        ],
-                      ),
+            //var _userData = _snapshot.data;
+            //return !_snapshot.hasData
+            // ? Center(
+            //     child: SpinKitPouringHourglass(
+            //       color: Colors.blue,
+            //     ),
+            //   )
+            // :
+            return Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                height: _height * 0.50,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    _userImageWidget(
+                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsLWfhRGKi5rXDo26WACBsX_aVbDYdAakP4w&usqp=CAU',
                     ),
-                  );
+                    _userNameWidget('Tom Cruise'),
+                    _userEmailWidget('tomcruice17@gmail.com'),
+                    _logoutButton(),
+                  ],
+                ),
+              ),
+            );
           },
         );
       },
@@ -104,7 +111,9 @@ class ProfilePage extends StatelessWidget {
       height: _height * 0.06,
       width: _width * 0.80,
       child: MaterialButton(
-        onPressed: () {},
+        onPressed: () {
+          _auth.logoutUser(() {});
+        },
         child: Text(
           'LOGOUT',
           style: TextStyle(
