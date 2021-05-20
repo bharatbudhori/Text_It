@@ -1,4 +1,11 @@
+import 'package:chati_fy/models/contact.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/auth_provider.dart';
+import '../services/db_service.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class SearchPage extends StatefulWidget {
   final _height;
@@ -11,22 +18,39 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  AuthProvider _auth;
+  String _searchText;
+
+  _SearchPageState() {
+    _searchText = '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: _searchPageUI(),
+      child: ChangeNotifierProvider<AuthProvider>.value(
+        value: AuthProvider.instance,
+        child: _searchPageUI(),
+      ),
     );
   }
 
   Widget _searchPageUI() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _userSearchField(),
-        _userListView(),
-      ],
+    return SingleChildScrollView(
+      child: Builder(
+        builder: (_context) {
+          _auth = Provider.of<AuthProvider>(_context);
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _userSearchField(),
+              _userListView(),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -38,7 +62,11 @@ class _SearchPageState extends State<SearchPage> {
       child: TextField(
         autocorrect: false,
         style: TextStyle(color: Colors.white),
-        onSubmitted: (_input) {},
+        onSubmitted: (_input) {
+          setState(() {
+            _searchText = _input;
+          });
+        },
         decoration: InputDecoration(
           prefixIcon: Icon(
             Icons.search,
@@ -55,37 +83,67 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _userListView() {
-    return Container(
-      height: this.widget._height * 0.75,
-      child: ListView.builder(
-        itemCount: 1,
-        itemBuilder: (_context, _integer) {
-          return ListTile(
-            title: Text('Bharat Budhori'),
-            leading: CircleAvatar(
-              backgroundColor: Colors.grey,
-              backgroundImage: NetworkImage(
-                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5NAQzseXiAQoYrETzEElTOuqUX6QncKaoxw&usqp=CAU',
-              ),
-            ),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Last seen',
-                  style: TextStyle(fontSize: 13),
+    return StreamBuilder<List<Contact>>(
+      stream: DBService.instance.getUsersInDB(_searchText),
+      builder: (_context, _snapshot) {
+        var _usersData = _snapshot.data;
+        if (_usersData != null) {
+          _usersData.removeWhere((element) => element.id == _auth.user.uid);
+        }
+
+        return !_snapshot.hasData
+            ? Center(
+                child: SpinKitPouringHourglass(
+                  color: Colors.blue,
                 ),
-                Text(
-                  'About an hour ago',
-                  style: TextStyle(fontSize: 13),
+              )
+            : Container(
+                height: this.widget._height * 0.75,
+                child: ListView.builder(
+                  itemCount: _usersData.length,
+                  itemBuilder: (_context, _index) {
+                    var _userData = _usersData[_index];
+                    var _currentTime = DateTime.now();
+                    var _isUserActive = !_userData.lastSeen.toDate().isBefore(
+                          _currentTime.subtract(
+                            Duration(minutes: 1),
+                          ),
+                        );
+                    return ListTile(
+                      title: Text(_userData.name),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.grey,
+                        backgroundImage: NetworkImage(
+                          _userData.image,
+                        ),
+                      ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            _isUserActive ? 'Active Now' : 'Last seen',
+                            style: TextStyle(fontSize: 13),
+                          ),
+                          _isUserActive
+                              ? CircleAvatar(
+                                  backgroundColor: Colors.green,
+                                  radius: 6,
+                                )
+                              : Text(
+                                  timeago.format(
+                                    _userData.lastSeen.toDate(),
+                                  ),
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
-          );
-        },
-      ),
+              );
+      },
     );
   }
 }

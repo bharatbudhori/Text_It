@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import '../services/snackbar_services.dart';
+import '../services/db_service.dart';
 
 enum AuthStatus {
   NotAuthenticated,
@@ -27,18 +29,19 @@ class AuthProvider with ChangeNotifier {
     chechCurrentUserIsAuthenticated();
   }
 
-  void autoLogin() {
+  void autoLogin() async {
     if (user != null) {
-      NavigationServices.instance.navigateToReplacement('home');
+      await DBService.instance.updateUserLastseenCount(user.uid);
+      return NavigationServices.instance.navigateToReplacement('home');
     }
   }
 
   void chechCurrentUserIsAuthenticated() async {
     user = await _auth.currentUser;
+
     if (user != null) {
-      print(user.email);
-      // print(user.photoURL);
-      NavigationServices.instance.navigateToReplacement('home');
+      notifyListeners();
+      await autoLogin();
     }
   }
 
@@ -52,6 +55,7 @@ class AuthProvider with ChangeNotifier {
       status = AuthStatus.Authenticated;
       SnackBarServices.instace.showSnackbarSuccess('Welcome ${user.email} !');
       print('user authenticated successfully');
+      await DBService.instance.updateUserLastseenCount(user.uid);
 
       //navigate to HomePage
       NavigationServices.instance.navigateToReplacement('home');
@@ -78,6 +82,7 @@ class AuthProvider with ChangeNotifier {
       status = AuthStatus.Authenticated;
       await onSuccess(user.uid);
       SnackBarServices.instace.showSnackbarSuccess('Welcome ${user.email} !');
+      await DBService.instance.updateUserLastseenCount(user.uid);
       print('user authenticated successfully');
       //update last seen time.
       //NavigationServices.instance.goBack();
@@ -98,7 +103,8 @@ class AuthProvider with ChangeNotifier {
     try {
       print('logging out');
       await _auth.signOut();
-      user = null;
+
+      //user = null;
       status = AuthStatus.NotAuthenticated;
       await onSuccess();
       NavigationServices.instance.navigateToReplacement('login');

@@ -17,7 +17,7 @@ class Contact {
 
   factory Contact.fromFirestore(dynamic _snapshot) {
     var _data = _snapshot.data();
-    print(_data);
+    //print(_data);
     //print('error!!!!!!!!');
     return Contact(
       id: _snapshot.id,

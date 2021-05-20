@@ -46,24 +46,30 @@ class RecentConversations extends StatelessWidget {
                         color: Colors.blue,
                       ),
                     )
-                  : ListView.builder(
-                      itemCount: _data.length,
-                      itemBuilder: (_context, _index) {
-                        return ListTile(
-                          onTap: () {},
-                          title: Text(_data[_index].name),
-                          subtitle: Text(_data[_index].lastMessage),
-                          leading: CircleAvatar(
-                            radius: 25,
-                            backgroundImage: NetworkImage(
-                              _data[_index].image,
-                            ),
+                  : _data.length == 0
+                      ? Center(
+                          child: Text(
+                            'No Conversations yet...Start chatting!',
                           ),
-                          trailing:
-                              _listTileTrailingWidget(_data[_index].timestamp),
+                        )
+                      : ListView.builder(
+                          itemCount: _data.length,
+                          itemBuilder: (_context, _index) {
+                            return ListTile(
+                              onTap: () {},
+                              title: Text(_data[_index].name),
+                              subtitle: Text(_data[_index].lastMessage),
+                              leading: CircleAvatar(
+                                radius: 25,
+                                backgroundImage: NetworkImage(
+                                  _data[_index].image,
+                                ),
+                              ),
+                              trailing: _listTileTrailingWidget(
+                                  _data[_index].timestamp),
+                            );
+                          },
                         );
-                      },
-                    );
             },
           ),
         );

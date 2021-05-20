@@ -32,6 +32,15 @@ class DBService {
     }
   }
 
+  Future<void> updateUserLastseenCount(String _userID) {
+    var _ref = _db.collection(_userCollection).doc(_userID);
+    return _ref.update(
+      {
+        'lastSeen': Timestamp.now(),
+      },
+    );
+  }
+
   Stream<Contact> getUserData(String _userID) {
     var _ref = _db.collection(_userCollection).doc(_userID);
     return _ref.snapshots().map((_snapshot) {
@@ -48,6 +57,20 @@ class DBService {
       (_snapshot) {
         return _snapshot.docs.map((_doc) {
           return ConversationSnippet.fromFirestore(_doc);
+        }).toList();
+      },
+    );
+  }
+
+  Stream<List<Contact>> getUsersInDB(String _searchName) {
+    var _ref = _db
+        .collection(_userCollection)
+        .where("name", isGreaterThanOrEqualTo: _searchName)
+        .where('name', isLessThan: _searchName + 'z');
+    return _ref.get().asStream().map(
+      (_snapshots) {
+        return _snapshots.docs.map((_doc) {
+          return Contact.fromFirestore(_doc);
         }).toList();
       },
     );
