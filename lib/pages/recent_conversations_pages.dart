@@ -1,5 +1,7 @@
 import 'package:chati_fy/models/conversation.dart';
+import 'package:chati_fy/pages/conversation_page.dart';
 import 'package:chati_fy/services/db_service.dart';
+import 'package:chati_fy/services/navigation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -56,7 +58,20 @@ class RecentConversations extends StatelessWidget {
                           itemCount: _data.length,
                           itemBuilder: (_context, _index) {
                             return ListTile(
-                              onTap: () {},
+                              onTap: () {
+                                NavigationServices.instance.navigateToRoute(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext _context) {
+                                      return ConversationPage(
+                                        _data[_index].conversationID,
+                                        _data[_index].id,
+                                        _data[_index].name,
+                                        _data[_index].image,
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
                               title: Text(_data[_index].name),
                               subtitle: Text(_data[_index].lastMessage),
                               leading: CircleAvatar(
