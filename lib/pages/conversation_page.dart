@@ -1,4 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+
+import '../services/db_service.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class ConversationPage extends StatefulWidget {
   String _conversationID;
@@ -21,27 +28,36 @@ class _ConversationPageState extends State<ConversationPage> {
   double _deviceHeight;
   double _deviceWidth;
 
+  AuthProvider _auth;
+
   @override
   Widget build(BuildContext context) {
     _deviceHeight = MediaQuery.of(context).size.height;
     _deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      appBar: AppBar(
-        title: Text(this.widget._recieverName),
         backgroundColor: Theme.of(context).backgroundColor,
-        centerTitle: true,
-      ),
-      body: _conversationPageUI(),
-    );
+        appBar: AppBar(
+          title: Text(this.widget._recieverName),
+          backgroundColor: Theme.of(context).backgroundColor,
+          centerTitle: true,
+        ),
+        body: ChangeNotifierProvider<AuthProvider>.value(
+          value: AuthProvider.instance,
+          child: _conversationPageUI(),
+        ));
   }
 
   Widget _conversationPageUI() {
-    return Stack(
-      overflow: Overflow.visible,
-      children: [
-        _messageListView(),
-      ],
+    return Builder(
+      builder: (_context) {
+        _auth = Provider.of<AuthProvider>(_context);
+        return Stack(
+          overflow: Overflow.visible,
+          children: [
+            _messageListView(),
+          ],
+        );
+      },
     );
   }
 
@@ -49,16 +65,37 @@ class _ConversationPageState extends State<ConversationPage> {
     return Container(
       height: _deviceHeight * 0.75,
       width: _deviceWidth,
-      child: ListView.builder(
-        itemCount: 1,
-        itemBuilder: (_context, _index) {
-          return _textMessageBubble(true, "Heya buddy, how are you?");
+      child: StreamBuilder(
+        stream: DBService.instance.getCOnversation(this.widget._conversationID),
+        builder: (_context, _snapshot) {
+          var _conversationData = _snapshot.data;
+          if (_conversationData != null) {
+            return ListView.builder(
+              itemCount: _conversationData.message.length,
+              itemBuilder: (_context, _index) {
+                var _message = _conversationData.message[_index];
+                bool isOwnMessage = _message.senderID == _auth.user.uid;
+                return _textMessageBubble(
+                  isOwnMessage,
+                  _message.content,
+                  _message.timestamp,
+                );
+              },
+            );
+          } else {
+            return Center(
+              child: SpinKitPouringHourglass(
+                color: Colors.blue,
+              ),
+            );
+          }
         },
       ),
     );
   }
 
-  Widget _textMessageBubble(bool _isOwnMessage, String _message) {
+  Widget _textMessageBubble(
+      bool _isOwnMessage, String _message, Timestamp _timesatmp) {
     List<Color> _colorScheme = _isOwnMessage
         ? [Colors.blue, Color.fromRGBO(42, 117, 188, 1)]
         : [Color.fromRGBO(69, 69, 69, 1), Color.fromRGBO(43, 43, 43, 1)];
@@ -82,7 +119,7 @@ class _ConversationPageState extends State<ConversationPage> {
         children: [
           Text(_message),
           Text(
-            'A moment ago',
+            timeago.format(_timesatmp.toDate()),
             style: TextStyle(
               color: Colors.white70,
             ),

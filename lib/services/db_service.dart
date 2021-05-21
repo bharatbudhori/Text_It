@@ -13,6 +13,7 @@ class DBService {
     _db = FirebaseFirestore.instance;
   }
   String _userCollection = 'Users';
+  String _conversationsCollection = 'Conversations';
 
   Future<void> createUserInDB(
     String _uid,
@@ -74,5 +75,13 @@ class DBService {
         }).toList();
       },
     );
+  }
+
+  Stream getCOnversation(String _conversationID) {
+    var _ref = _db.collection(_conversationsCollection).doc(_conversationID);
+
+    return _ref.snapshots().map((_snapshot) {
+      return Conversation.fromFirestore(_snapshot);
+    });
   }
 }
