@@ -69,6 +69,8 @@ class ProfilePage extends StatelessWidget {
     return CircleAvatar(
       radius: _height * 0.10,
       backgroundImage: NetworkImage(_image),
+      // backgroundImage: NetworkImage(
+      //     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsLWfhRGKi5rXDo26WACBsX_aVbDYdAakP4w&usqp=CAU'),
       backgroundColor: Colors.grey,
     );
   }
