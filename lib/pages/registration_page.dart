@@ -116,7 +116,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _imageSelectorWidget(),
+            imageSelectorWidget(),
             _nameTextField(),
             _emailTextField(),
             _passwordTextField(),
@@ -126,7 +126,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  Widget _imageSelectorWidget() {
+  Widget imageSelectorWidget() {
     return GestureDetector(
       onTap: () {
         return showDialog(
