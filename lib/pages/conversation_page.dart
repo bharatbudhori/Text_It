@@ -55,6 +55,10 @@ class _ConversationPageState extends State<ConversationPage> {
           overflow: Overflow.visible,
           children: [
             _messageListView(),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: _messageField(_context),
+            ),
           ],
         );
       },
@@ -63,7 +67,7 @@ class _ConversationPageState extends State<ConversationPage> {
 
   Widget _messageListView() {
     return Container(
-      height: _deviceHeight * 0.75,
+      height: _deviceHeight,
       width: _deviceWidth,
       child: StreamBuilder(
         stream: DBService.instance.getCOnversation(this.widget._conversationID),
@@ -71,14 +75,28 @@ class _ConversationPageState extends State<ConversationPage> {
           var _conversationData = _snapshot.data;
           if (_conversationData != null) {
             return ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 20),
               itemCount: _conversationData.message.length,
               itemBuilder: (_context, _index) {
                 var _message = _conversationData.message[_index];
                 bool isOwnMessage = _message.senderID == _auth.user.uid;
-                return _textMessageBubble(
-                  isOwnMessage,
-                  _message.content,
-                  _message.timestamp,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: isOwnMessage
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
+                    children: [
+                      !isOwnMessage ? _userImageWidget() : Text(''),
+                      _textMessageBubble(
+                        isOwnMessage,
+                        _message.content,
+                        _message.timestamp,
+                      ),
+                    ],
+                  ),
                 );
               },
             );
@@ -90,6 +108,16 @@ class _ConversationPageState extends State<ConversationPage> {
             );
           }
         },
+      ),
+    );
+  }
+
+  Widget _userImageWidget() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: CircleAvatar(
+        backgroundColor: Colors.grey,
+        backgroundImage: NetworkImage(this.widget._recieverImage),
       ),
     );
   }
@@ -125,6 +153,77 @@ class _ConversationPageState extends State<ConversationPage> {
             ),
           )
         ],
+      ),
+    );
+  }
+
+  Widget _messageField(BuildContext _context) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: _deviceWidth * 0.03,
+        vertical: _deviceHeight * 0.02,
+      ),
+      height: _deviceHeight * 0.07,
+      decoration: BoxDecoration(
+        color: Color.fromRGBO(43, 43, 43, 1),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Form(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _messageTextField(),
+            _sendMessageButton(_context),
+            _imageMessageButton(_context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _messageTextField() {
+    return SizedBox(
+      width: _deviceWidth * 0.55,
+      child: TextFormField(
+        validator: (_input) {
+          if (_input.trim().length == 0) {
+            return 'Please enter a message';
+          }
+          return null;
+        },
+        onChanged: (_input) {},
+        onSaved: (_input) {},
+        cursorColor: Colors.white,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: 'Type a message',
+        ),
+        autocorrect: true,
+      ),
+    );
+  }
+
+  Widget _sendMessageButton(BuildContext _context) {
+    return CircleAvatar(
+      backgroundColor: Color.fromRGBO(43, 43, 43, 1),
+      child: IconButton(
+        icon: Icon(
+          Icons.send,
+          color: Colors.white,
+        ),
+        onPressed: () {},
+      ),
+    );
+  }
+
+  Widget _imageMessageButton(BuildContext _context) {
+    return CircleAvatar(
+      backgroundColor: Colors.blue,
+      child: FloatingActionButton(
+        onPressed: () {},
+        child: Icon(Icons.camera_enhance),
       ),
     );
   }
