@@ -1,4 +1,6 @@
 import 'package:chati_fy/models/contact.dart';
+import 'package:chati_fy/pages/conversation_page.dart';
+import 'package:chati_fy/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -103,6 +105,7 @@ class _SearchPageState extends State<SearchPage> {
                   itemCount: _usersData.length,
                   itemBuilder: (_context, _index) {
                     var _userData = _usersData[_index];
+                    var _recepientID = _usersData[_index].id;
                     var _currentTime = DateTime.now();
                     var _isUserActive = !_userData.lastSeen.toDate().isBefore(
                           _currentTime.subtract(
@@ -110,6 +113,26 @@ class _SearchPageState extends State<SearchPage> {
                           ),
                         );
                     return ListTile(
+                      onTap: () {
+                        DBService.instance.createOrGetConversation(
+                          _auth.user.uid,
+                          _recepientID,
+                          (String _conversationID) {
+                            NavigationServices.instance.navigateToRoute(
+                              MaterialPageRoute(
+                                builder: (_context) {
+                                  return ConversationPage(
+                                    _conversationID,
+                                    _recepientID,
+                                    _userData.name,
+                                    _userData.image,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      },
                       title: Text(_userData.name),
                       leading: CircleAvatar(
                         backgroundColor: Colors.grey,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chati_fy/models/message.dart';
 import 'package:chati_fy/services/cloud_storage_service.dart';
 import 'package:chati_fy/services/media_service.dart';
@@ -179,7 +181,12 @@ class _ConversationPageState extends State<ConversationPage> {
     List<Color> _colorScheme = _isOwnMessage
         ? [Colors.blue, Color.fromRGBO(42, 117, 188, 1)]
         : [Color.fromRGBO(69, 69, 69, 1), Color.fromRGBO(43, 43, 43, 1)];
+    DecorationImage _image = DecorationImage(
+      image: NetworkImage(_imageUrl),
+      fit: BoxFit.cover,
+    );
     return Container(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
@@ -191,7 +198,6 @@ class _ConversationPageState extends State<ConversationPage> {
       ),
       height: _deviceHeight * 0.10 + (_imageUrl.length / 20 * 5.0),
       width: _deviceWidth * 0.75,
-      padding: EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         mainAxisSize: MainAxisSize.max,
@@ -202,10 +208,7 @@ class _ConversationPageState extends State<ConversationPage> {
             width: _deviceWidth * 0.40,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(
-                image: NetworkImage(_imageUrl),
-                fit: BoxFit.cover,
-              ),
+              image: _image,
             ),
           ),
           Text(
@@ -310,8 +313,8 @@ class _ConversationPageState extends State<ConversationPage> {
       backgroundColor: Colors.blue,
       child: FloatingActionButton(
         onPressed: () async {
-          var _image =
-              await MediaService.instance.getIamgeFromLibrary('camera');
+          File _image =
+              await MediaService.instance.getIamgeFromLibrary('gallery');
           if (_image != null) {
             var _result = await CloudStorageService.instance
                 .uploadMediaMessage(_auth.user.uid, _image);
@@ -326,6 +329,8 @@ class _ConversationPageState extends State<ConversationPage> {
                 type: MessageType.Image,
               ),
             );
+          } else {
+            print('NO image taken');
           }
         },
         child: Icon(Icons.camera_enhance),

@@ -71,6 +71,35 @@ class DBService {
     );
   }
 
+  void createOrGetConversation(
+    String _currentID,
+    String _recepientID,
+    Future<void> _onSuccess(String _conversationID),
+  ) async {
+    var _ref = _db.collection(_conversationsCollection);
+    var _userConversationRef = _db
+        .collection(_userCollection)
+        .doc(_currentID)
+        .collection(_conversationsCollection);
+    try {
+      dynamic conversation = await _userConversationRef.doc(_recepientID).get();
+      if (conversation.data() != null) {
+        return _onSuccess(conversation.data['conversationID']);
+      } else {
+        var _conversationRef = _ref.doc();
+        await _conversationRef.set(
+          {
+            'members': [_currentID, _recepientID],
+            'ownerID': [_currentID],
+          },
+        );
+        return _onSuccess(_conversationRef.id);
+      }
+    } catch (error) {
+      print(error);
+    }
+  }
+
   Stream<Contact> getUserData(String _userID) {
     var _ref = _db.collection(_userCollection).doc(_userID);
     return _ref.snapshots().map((_snapshot) {
